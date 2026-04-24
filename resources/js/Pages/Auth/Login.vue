@@ -5,7 +5,7 @@
 
 <template>
     <Default>
-        <Head :title="title ?? 'Главная страница'" />
+        <Head :title="title ?? 'Авторизация пользователя'" />
         <main>
             Login
         </main>

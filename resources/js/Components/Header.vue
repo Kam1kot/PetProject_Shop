@@ -1,9 +1,13 @@
 <script setup>
     import { Link, usePage } from '@inertiajs/vue3'
-    import { computed } from 'vue'
     const page = usePage()
-    console.log(page);
-    // console.log(page)
+
+    const isAuth = page.props.auth.user ? page.props.auth.user : null;
+    const user = page.props.auth.user
+
+    console.log('HEAD Page props: ', page.props)
+    console.log('HEAD Auth: ', isAuth)
+    console.log('HEAD User: ', user)
 </script>
 
 <template>
@@ -23,8 +27,9 @@
                 <Link href="#" class="navbar___account">
                     <i class="fa-solid fa-circle-user"></i>
                     <div class="acc-popup">
-                        <Link :href="`#`">Профиль</Link>
-                        <Link :href="`#`">Войти</Link>
+                        <Link v-if="isAuth" :href="`/profile`">Профиль</Link>
+                        <Link v-if="!isAuth" :href="`/login`">Войти</Link>
+                        <Link style="text-wrap: nowrap;" v-if="!isAuth" :href="`/register`">Создать аккаунт</Link>
                         <Link v-if="isAuth"
                             :href="`/logout`" 
                             method="post" 

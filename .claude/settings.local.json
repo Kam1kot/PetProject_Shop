@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan *)",
+      "Bash(php *)",
+      "Bash(composer dump-autoload *)",
+      "Bash(where composer *)",
+      "Read(//c/OSPanel/**)",
+      "Bash(/c/Users/Regulus/.config/herd-lite/bin/composer.bat dump-autoload *)"
+    ]
+  }
+}

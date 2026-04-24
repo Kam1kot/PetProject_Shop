@@ -19,7 +19,7 @@
 
 <template>
     <Default>
-        <Head :title="title ?? 'Главная страница'" />
+        <Head :title="title ?? 'Регистрация пользователя" />
         <main>
             <h3>Регистрация пользователя. Вас? <strong>:3</strong></h3>
             <h4>Или вы уже у нас были? <Link :href="`/login`">Войти</Link></h4>

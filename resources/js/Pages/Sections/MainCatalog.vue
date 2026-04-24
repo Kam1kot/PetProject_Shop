@@ -5,19 +5,15 @@
 
     import ProductList from '../../Components/productList.vue';
     import RecommendationsSwiper from '../../Components/recommendationsSwiper.vue';
-    const page = usePage()
-
-    const isAuth = computed(() => page.props.auth.user !== null)
-    const user = computed(() => page.props.auth.user)
 
     const mainProps = defineProps({
         title: String,
         products: Object,
         hitProducts: Array
     })
-    console.log(page);
-    console.log(isAuth);
-    console.log(user);
+    // console.log(page);
+    // console.log(isAuth);
+    // console.log(user);
 </script>
 
 <template>
