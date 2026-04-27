@@ -140,3 +140,9 @@
         </main>
     </Default>
 </template>
+
+<style scoped>
+main {
+    padding-top: 0 !important;
+}
+</style>

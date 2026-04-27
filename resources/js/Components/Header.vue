@@ -5,8 +5,8 @@
     const isAuth = page.props.auth.user ? page.props.auth.user : null;
     const user = page.props.auth.user
 
-    console.log('HEAD Page props: ', page.props)
-    console.log('HEAD Auth: ', isAuth)
+    // console.log('HEAD Page props: ', page.props)
+    // console.log('HEAD Auth: ', isAuth)
     console.log('HEAD User: ', user)
 </script>
 
@@ -25,9 +25,10 @@
                 <button class="navbar___find"><i class="fa-solid fa-magnifying-glass"></i></button>
                 <Link href="#" class="navbar___cart"><i class="fa-solid fa-cart-shopping"></i></Link>
                 <Link href="#" class="navbar___account">
-                    <i class="fa-solid fa-circle-user"></i>
+                    <img v-if="user.avatar" :src="'/storage/' + user.avatar" alt="Avatar" class="avatar-imgHeader">   
+                    <i v-else class="fa-solid fa-circle-user"></i>
                     <div class="acc-popup">
-                        <Link v-if="isAuth" :href="`/profile`">Профиль</Link>
+                        <Link v-if="isAuth" :href="`/profile/`">Профиль</Link>
                         <Link v-if="!isAuth" :href="`/login`">Войти</Link>
                         <Link style="text-wrap: nowrap;" v-if="!isAuth" :href="`/register`">Создать аккаунт</Link>
                         <Link v-if="isAuth"
@@ -46,7 +47,14 @@
     </header>
 </template>
 
-<style>
+<style scoped>
+.avatar-imgHeader {
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 .navbar___account {
     position: relative;
     z-index: 2;
@@ -78,7 +86,7 @@
     font-size: 1em;
     transition: 0.3s all;
 }
-.acc-popup a:hover {
+.acc-popup a:hover,.acc-popup button:hover {
     text-decoration: underline;
 }
 </style>

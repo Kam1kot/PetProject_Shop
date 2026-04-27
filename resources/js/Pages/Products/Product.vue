@@ -153,7 +153,7 @@ const getColorRating = (rating) => {
     </Layout>
 </template>
 
-<style>
+<style scoped>
 hr {
     margin-bottom: 0.2rem;
     width: 100%;
@@ -165,7 +165,7 @@ hr {
     align-items: center;
 
     width: 60%;
-    margin: 3.5rem auto 0;
+    margin: 0 auto 0;
     padding: 1.5rem 0;
 }
 .breadcrumb {

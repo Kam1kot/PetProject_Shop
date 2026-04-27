@@ -31,7 +31,6 @@
                     <span v-if="form.errors.name" class="error">{{ form.errors.name }}</span>
                 </label>
                 
-
                 <label>
                     Фамилия
                     <input type="text" v-model="form.surname" autocomplete="surname">
@@ -55,6 +54,7 @@
                     <input type="password" v-model="form.password" autocomplete="password">
                     <span v-if="form.errors.password" class="error">{{ form.errors.password }}</span>
                 </label>
+
                 <label for="conf-password">
                     Подтвердите пароль
                     <input type="password" v-model="form.password_confirmation">
@@ -69,7 +69,7 @@
     </Default>
 </template>
 
-<style>
+<style scoped>
 h3 {
     margin-right: auto;
     font-size: 2.2em;

@@ -1,6 +1,6 @@
 <script setup>
     import Default from '../Layouts/Main.vue'
-    import { useForm, Head } from '@inertiajs/vue3'
+    import { useForm, Link, Head } from '@inertiajs/vue3'
 
     const form = useForm({
         email: '',
@@ -41,7 +41,7 @@
     </Default>
 </template>
 
-<style>
+<style scoped>
 main {
     margin-top: 8rem;
 }
