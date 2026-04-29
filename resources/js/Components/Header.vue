@@ -25,7 +25,7 @@
                 <button class="navbar___find"><i class="fa-solid fa-magnifying-glass"></i></button>
                 <Link href="#" class="navbar___cart"><i class="fa-solid fa-cart-shopping"></i></Link>
                 <Link href="#" class="navbar___account">
-                    <img v-if="user.avatar" :src="'/storage/' + user.avatar" alt="Avatar" class="avatar-imgHeader">   
+                    <img v-if="user && user.avatar" :src="'/storage/' + user.avatar" alt="Avatar" class="avatar-imgHeader">   
                     <i v-else class="fa-solid fa-circle-user"></i>
                     <div class="acc-popup">
                         <Link v-if="isAuth" :href="`/profile/`">Профиль</Link>

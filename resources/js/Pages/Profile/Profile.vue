@@ -1,16 +1,20 @@
 <script setup>
     import Default from '../Layouts/Main.vue'
     import { Head, Link, usePage, useForm, router } from '@inertiajs/vue3'
-    import { ref, onMounted, onUnmounted } from 'vue'
+    import { ref, onMounted, onUnmounted, computed } from 'vue'
     import { route } from 'ziggy-js';
 
     const page = usePage();
     const user = page.props.auth.user
     const isOpenAvatarMenu = ref(false)
+    const isOpenModalRP = ref(false)
     const fileInput = ref(null);
 
     const toggleMenu = () => {
         isOpenAvatarMenu.value = !isOpenAvatarMenu.value
+    }
+    const toggleModalRP = () => {
+        isOpenModalRP.value = !isOpenModalRP.value
     }
 
     const form = useForm({
@@ -24,13 +28,32 @@
         avatar: null,
         _method: 'patch'
     })
+    const resetForm = useForm({
+        oldPassword: '',
+        confirmOldPassword: '',
+        newPassword: '',
+    })
+    const showPassword = ref({
+        current: false,
+        confirm: false,
+        new: false
+    })
+    const isPasswordMatch = computed(() => {
+        return resetForm.newPassword === resetForm.confirmOldPassword && resetForm.confirmOldPassword !== ''
+    })
 
+    const isPasswordValid = computed(() => {
+        return resetForm.newPassword.length >= 5
+    })
+    const isNewEqualOldPassword = computed(() => {
+        if (!resetForm.oldPassword || !resetForm.newPassword) return true; // пока поля пустые, не ругаемся
+        return resetForm.oldPassword !== resetForm.newPassword
+    })
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             avatarForm.avatar = file;
             
-            // Отправляем файл на сервер
             avatarForm.post('/profile/avatar/update', {
                 forceFormData: true,
                 preserveScroll: true,
@@ -41,14 +64,44 @@
             });
         }
     };
-    const deleteAvatar = () => {
-        router.delete('/profile/avatar/delete', {
+    const deleteAvatar = async () => {
+        await router.delete('/profile/avatar/delete', {
             preserveScroll: true,
             preserveState: false,
             onSuccess: () => {
                 isOpenAvatarMenu.value = false;
             },
         });
+    }
+    const submitData = async () => {
+        const isNotChange = form.name == user.name && form.surname == user.surname && form.nickname == user.nickname
+
+        if (isNotChange) {
+            return
+        }
+        form.patch('/profile/data/update', {
+            preserveScroll: true,
+            preserveState: false,
+            onSuccess: () => {
+                console.log('Успешно')
+            },
+            onError: () => {
+                console.log('Ошибка')
+            }
+        })
+    }
+    const updatePassword = async () => {
+        resetForm.patch('/profile/password/reset', {
+            preserveScroll: true,
+            onSuccess: () => {
+                isOpenModalRP.value = false;
+                resetForm.reset(); // Очищаем поля паролей
+                console.log('Пароль изменен');
+            },
+            onError: (errors) => {
+                console.log('Ошибка сервера:', errors);
+            }
+        })
     }
     const formatDate = (dateStr) => {
         return new Date(dateStr).toLocaleString('ru-RU', {
@@ -115,14 +168,14 @@
                             <p v-if="form.errors.avatar" style="color: red;">{{ form.errors.avatar }}</p>
                         </div>   
                         <div>
-                            <div>
+                            <div class="user-fio">
                                 <span>{{ user.name }}</span>
                                 <span>{{ user.surname }}</span>
                             </div>
-                            <p class="info">Дата регистрации: {{ formatDate(user.created_at).toLocaleString('ru-RU')}}</p>
+                            <p class="info">Дата регистрации: {{ formatDate(user.created_at) }}</p>
                         </div>
                     </div>
-                    <form @submit.prevent="submit" class="user-info">
+                    <form @submit.prevent="submitData" class="user-info">
                         
                         <div class="form-group">
                             <input v-model="form.name" type="text" placeholder=" " />
@@ -149,17 +202,185 @@
                             <label>Телефон</label>
                         </div>
 
-                        <button type="submit" class="btn">
+                        <button style="display: none;" type="submit" class="btn">
                             Сохранить
                         </button>
                     </form>
+
+                    <div class="btns">
+                        <Link method="post" :href="`/logout`"><i class="fa-solid fa-arrow-right-from-bracket"></i> Выйти</Link>
+                        <button @click="toggleModalRP()"><i class="fa-solid fa-arrows-rotate"></i> Сменить пароль</button>
+                        
+                        <Teleport to="body">
+                            <div v-if="isOpenModalRP" class="modal-wrapper" @click.self="toggleModalRP">
+                                <div class="modal">
+                                    <h3>Смена пароля</h3>
+                                    <form @submit.prevent="updatePassword">
+                                        <div class="modal-field">
+                                            <label>Текущий пароль</label>
+                                            <div class="input-wrapper">
+                                                <input 
+                                                    :type="showPassword.current ? 'text' : 'password'" 
+                                                    v-model="resetForm.oldPassword"
+                                                    placeholder="Введите текущий пароль"
+                                                />
+                                                <i @click="showPassword.current = !showPassword.current" 
+                                                class="fa-solid" :class="showPassword.current ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                            </div>
+                                            <!-- Ошибка от Laravel, если пароль неверный -->
+                                            <p v-if="resetForm.errors.oldPassword" class="error">{{ resetForm.errors.oldPassword }}</p>
+                                        </div>
+
+                                        <div class="modal-field">
+                                            <label>Новый пароль</label>
+                                            <div class="input-wrapper">
+                                                <input 
+                                                    :type="showPassword.new ? 'text' : 'password'" 
+                                                    v-model="resetForm.newPassword"
+                                                    placeholder="Минимум 5 символов"
+                                                />
+                                                <i @click="showPassword.new = !showPassword.new" 
+                                                class="fa-solid" :class="showPassword.new ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                            </div>
+                                            <p v-if="!isNewEqualOldPassword" class="error">Новый пароль совпадает со старым</p>
+                                        </div>
+                                        <div class="modal-field">
+                                            <label>Подтверждение нового пароля</label>
+                                            <div class="input-wrapper">
+                                                <input 
+                                                    :type="showPassword.confirm ? 'text' : 'password'" 
+                                                    v-model="resetForm.confirmOldPassword"
+                                                    placeholder="Повторите новый пароль"
+                                                />
+                                                <i @click="showPassword.confirm = !showPassword.confirm" 
+                                                class="fa-solid" :class="showPassword.confirm ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                            </div>
+                                            <p v-if="resetForm.confirmOldPassword && !isPasswordMatch" class="error">Пароли не совпадают</p>
+                                        </div>
+                                        <button 
+                                            class="submit-reset"
+                                            :disabled="!isPasswordMatch || !isPasswordValid || !isNewEqualOldPassword || resetForm.processing"
+                                        >
+                                            {{ resetForm.processing ? 'Сохранение...' : 'Обновить пароль' }}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </Teleport>
+                    </div>
                 </div>
             </div>
         </main>
     </Default>
 </template>
 
-<style>
+<style scoped>
+.modal h3 {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.modal-field {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.modal-field label {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.modal-field input {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 0.4rem;
+    outline: none;
+}
+
+.modal-field input:focus {
+    border-color: skyblue;
+}
+
+.submit-reset {
+    margin-top: 1rem;
+    padding: 0.8rem;
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.submit-reset:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.submit-reset:not(:disabled):hover {
+    background-color: #000;
+}
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-wrapper i {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  color: gray;
+}
+.error {
+  color: red;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+.modal-wrapper {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(51, 51, 51, 0.514);
+    z-index: 998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal {
+    position: relative;
+    z-index: 999;
+    width: 20rem;
+    height: 25rem;
+    background-color: white;
+    border-radius: 1rem;
+    padding: 0.75rem 1rem;
+}
+.modal form {
+    display: flex;
+    flex-direction: column;
+}
+.btns {
+    width: 100%;
+    display: block;
+    align-items: center;
+    justify-content: flex-start;
+}
+.btns button {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+    border: 1px solid gray;
+    cursor: pointer;
+
+    transition: background-color 0.15s;
+}
+.btns button:hover {
+    background-color: #ccc;
+}
 .active {
     color: black !important;
     font-weight: 500 !important;
@@ -181,6 +402,23 @@ input::placeholder {
     
     margin: 0 auto;
     width: 60%;
+}
+.user-fio {
+    font-size: 1.2em;
+    display: flex;
+    gap: 5px;
+}
+.user-info button {
+    width: max-content;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid gray;
+    box-shadow: 0 10px 500px black;
+    transition: background-color 0.15s;
+    cursor: pointer;
+}
+.user-info button:hover {
+    background-color: #ccc;
 }
 .profile h1 {
     width: 100%;
@@ -391,5 +629,4 @@ input::placeholder {
 .form-group.full {
     grid-column: span 2 / span 2;
 }
-
 </style>

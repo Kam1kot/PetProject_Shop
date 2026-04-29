@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
@@ -24,6 +26,30 @@ class UserController extends Controller
     {
         return Inertia::render('Profile/Addresses');
     }
+    public function updateData(Request $request) {
+        $data = $request->validate([
+            'name' => 'required|max:255|min:3',
+            'surname' => 'required|max:255|min:3',
+            'nickname' => 'required|max:255|min:3',
+        ]);
+        auth()->user()->update($data);
+    }
+    public function passwordReset (Request $request) {
+        $user = auth()->user();
+
+        if (!Hash::check($request->oldPassword,$user->password)) {
+            return back()->withErrors(['oldPassword' => 'Неверный текущий пароль']);
+        }
+
+        $request->validate([
+            'newPassword' => 'required|min:5',
+        ]);
+
+        $user->password = Hash::make($request->newPassword);
+        $user->save();
+
+        return back()->with('success', 'Пароль успешно изменен');
+    }
     public function updateAvatar(Request $request)
     {
         $request->validate([
@@ -41,7 +67,7 @@ class UserController extends Controller
             // Сохраняем новый файл
             $path = $request->file('avatar')->store('avatars', 'public');
             
-            // 2. Явно обновляем поле в БД
+            // Явно обновляем поле в БД
             $user->avatar = $path;
             $user->save();
         }
