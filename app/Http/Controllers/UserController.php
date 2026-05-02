@@ -16,7 +16,10 @@ class UserController extends Controller
     }
     public function orders() 
     {
-        return Inertia::render('Profile/Orders');
+        $orders = auth()->user()->orders()->latest()->get();
+        return Inertia::render('Profile/Orders', [
+            'orders' => $orders,
+        ]);
     }
     public function reviews() 
     {

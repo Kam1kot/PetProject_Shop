@@ -284,6 +284,9 @@ li::before {
 
     padding: 2.6rem;
 }
+.profile {
+    min-height: 80vh;
+}
 .card_image-wrapper span {
     padding: 2px 12px;
     background-color: white;

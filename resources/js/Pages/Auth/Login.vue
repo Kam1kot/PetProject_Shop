@@ -4,7 +4,8 @@
 
     const form = useForm({
         email: '',
-        password: ''
+        password: '',
+        remember: false
     })
     const submit = () => {
         form.post('/login', {
@@ -32,6 +33,13 @@
                     <input type="password" v-model="form.password" autocomplete="password">
                     <span v-if="form.errors.password" class="error">{{ form.errors.password }}</span>
                 </label>
+
+                <div class="remember-me">
+                    <label>
+                        Запомнить меня
+                        <input type="checkbox" v-model="form.remember" name="remember">
+                    </label>
+                </div>
                 
                 <button :disabled="form.processing" type="submit">
                     {{ form.processing ? 'Вход...' : 'Войти в аккаунт' }}
@@ -42,6 +50,22 @@
 </template>
 
 <style scoped>
+.remember-me {
+    width: max-content;
+}
+.remember-me label{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 20px;
+    font-size: 1.1em;
+}
+.remember-me label input {
+    transform: scale(1.2);
+    width: auto;
+    height: auto;
+}
 main {
     margin-top: 8rem;
 }

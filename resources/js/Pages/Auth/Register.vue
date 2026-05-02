@@ -65,6 +65,7 @@
                     {{ form.processing ? 'Регистрация...' : 'Зарегистрироваться' }}
                 </button>
             </form>
+            
         </main>
     </Default>
 </template>

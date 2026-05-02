@@ -1,6 +1,6 @@
 <script setup>
     import Default from '../Layouts/Main.vue'
-    import { Head, Link, usePage, useForm, router } from '@inertiajs/vue3'
+    import { Head, Link, usePage, useForm, router, Form } from '@inertiajs/vue3'
     import { ref, onMounted, onUnmounted, computed } from 'vue'
     import { route } from 'ziggy-js';
 
@@ -9,14 +9,29 @@
     const isOpenAvatarMenu = ref(false)
     const isOpenModalRP = ref(false)
     const fileInput = ref(null);
-
+    const phoneInputChange = ref(false);
+    const emailInputChange = ref(false);
+    
     const toggleMenu = () => {
         isOpenAvatarMenu.value = !isOpenAvatarMenu.value
     }
     const toggleModalRP = () => {
         isOpenModalRP.value = !isOpenModalRP.value
     }
-
+    const handlePhone = () => {
+        if (form.phone.length >= 1 && form.phone != user.phone) {
+            phoneInputChange.value = true;
+        } else if (form.phone.length >= 1 && form.phone == user.phone) {
+            phoneInputChange.value = false;
+        }
+    }
+    const handleEmail = () => {
+        if (form.email.length >= 1 && form.email != user.email) {
+            emailInputChange.value = true;
+        } else if (form.email.length >= 1 && form.email == user.email) {
+            emailInputChange.value = false;
+        }
+    }
     const form = useForm({
         name: user.name ?? '',
         surname: user.surname ?? '',
@@ -41,7 +56,6 @@
     const isPasswordMatch = computed(() => {
         return resetForm.newPassword === resetForm.confirmOldPassword && resetForm.confirmOldPassword !== ''
     })
-
     const isPasswordValid = computed(() => {
         return resetForm.newPassword.length >= 5
     })
@@ -191,15 +205,19 @@
                             <input v-model="form.nickname" type="text" placeholder=" " />
                             <label>Имя пользователя</label>
                         </div>
-
-                        <div class="form-group full">
-                            <input v-model="form.email" type="email" placeholder=" " />
-                            <label>Почта</label>
+                        <div :class="emailInputChange ? 'isChangeWrapper' : ''" class="full emailForm">
+                            <div class="form-group ">
+                                <input v-model="form.email" @input="handleEmail" type="email"/>
+                                <label>Почта</label>
+                            </div>
+                            <Link v-if="emailInputChange" :href="`/profile/email/confrimation`" :as="button">Подтвердить</Link>
                         </div>
-
-                        <div class="form-group full">
-                            <input v-model="form.phone" type="text" placeholder=" " />
-                            <label>Телефон</label>
+                        <div :class="phoneInputChange ? 'isChangeWrapper' : ''" class="full phoneForm">
+                            <div class="form-group">
+                                <input v-model="form.phone" @input="handlePhone" type="text" />
+                                <label>Телефон</label>
+                            </div>
+                            <Link v-if="phoneInputChange" :href="`/profile/phone/confrimation`" :as="button">Подтвердить</Link>
                         </div>
 
                         <button style="display: none;" type="submit" class="btn">
@@ -366,9 +384,10 @@
 }
 .btns {
     width: 100%;
-    display: block;
+    display: flex;
     align-items: center;
     justify-content: flex-start;
+    gap: 10px;
 }
 .btns button {
     padding: 0.5rem 0.75rem;
@@ -394,6 +413,9 @@ input:-webkit-autofill:focus {
     -webkit-box-shadow: 0 0 0px 1000px #fff inset !important;
     -webkit-text-fill-color: black !important;
     transition: background-color 5000s ease-in-out 0s;
+}
+input {
+    width: 100%;
 }
 input::placeholder {
     color: gray;
@@ -626,7 +648,31 @@ input::placeholder {
     background-color: aliceblue;
     color: black
 }
-.form-group.full {
+.full {
     grid-column: span 2 / span 2;
+}
+.isChangeWrapper {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    grid-column: span 1 / span 2;
+}
+.isChangeWrapper a {
+    background-color: gray;
+    color: white;
+    border: 1px solid gray;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+
+    transition: background-color 0.15s;
+}
+.isChangeWrapper a:hover {
+    background-color: rgba(128, 128, 128, 0.882);
+}
+.emailForm {
+    grid-row-start: 3;
+}
+.phoneForm {
+    grid-row-start: 4;
 }
 </style>
