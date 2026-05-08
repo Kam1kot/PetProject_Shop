@@ -22,8 +22,3 @@ Route::middleware('auth')->prefix('/profile')->group(function() {
     Route::delete('/avatar/delete', [UserController::class, 'deleteAvatar'])->name('profile.deleteAvatar');
     Route::patch('/password/reset', [UserController::class, 'passwordReset']);
 });
-
-Route::prefix('/api')->group(function() {
-    Route::get('/products', [ProductController::class, 'products']);
-    Route::get('/products/hits', [ProductController::class, 'hitProducts']);
-});

@@ -23,7 +23,10 @@ class UserController extends Controller
     }
     public function reviews() 
     {
-        return Inertia::render('Profile/Reviews');
+        $reviews = auth()->user()->reviews()->latest()->get();
+        return Inertia::render('Profile/Reviews', [
+            'reviews' => $reviews,
+        ]);
     }
     public function addresses() 
     {

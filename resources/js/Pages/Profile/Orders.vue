@@ -197,7 +197,6 @@
 
 .checkbox-group {
     display: flex;
-    flex-direction: column;
     gap: 12px;
 }
 

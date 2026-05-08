@@ -1,9 +1,56 @@
 <script setup>
     import Default from '../Layouts/Main.vue'
     import { Head, Link, usePage } from '@inertiajs/vue3'
+    import { computed, ref } from 'vue';
     import { route } from 'ziggy-js';
-    const page = usePage();
-    const user = page.props.auth.user
+
+    const props = defineProps({
+        reviews: Array,
+    })
+
+    const sortBy = ref('Новейшие');
+    const sortingOptions = [
+        'Новейшие',
+        'Старые',
+        'Лучший рейтинг',
+        'Худший рейтинг',
+    ];
+
+    const selectedStatuses = ref('Все');
+    const statusOptions = [
+        'Все',
+        'На рассмотрении',
+        'Запощенные',
+        'Отклоненные'
+    ];
+
+    const filteredReviews = computed(() => {
+        let result = [...props.reviews];
+
+        if (selectedStatuses.value !== 'Все') {
+            result = result.filter(review => {
+                if (selectedStatuses.value === 'На рассмотрении') return review.status === 'pending'
+                if (selectedStatuses.value === 'Запощенные') return review.status === 'approved'
+                if (selectedStatuses.value === 'Отклоненные') return review.status === 'rejected'
+                return true;
+            })
+        }
+
+        result.sort((a,b) => {
+            if (sortBy.value === 'Новейшие' ) return new Date(b.published_at) - new Date(a.published_at)
+            if (sortBy.value === 'Старые') return new Date(a.published_at) - new Date(b.published_at)
+            if (sortBy.value === 'Лучший рейтинг') return b.rating - a.rating
+            if (sortBy.value === 'Худший рейтинг') return a.rating - b.rating
+            return 0
+        })
+
+        return result
+    });
+
+    const resetFilters = () => {
+        sortBy.value = 'Новейшие';
+        selectedStatuses.value = [];
+    };
 </script>
 
 <template>
@@ -34,13 +81,50 @@
                         Достижения WIP
                     </Link> -->
                 </div>
-                <div class="profile-main"></div>
+                <div class="profile-main">
+                    <div class="filters-container">
+                        <div class="filter-group">
+                            <span>Статус:</span>
+                            <label v-for="status in statusOptions" :key="status" class="checkbox-label">
+                                <input type="radio" :value="status" v-model="selectedStatuses">
+                                {{ status }}
+                            </label>
+                        </div>
+
+                        <hr>
+
+                        <div class="filter-group">
+                            <span>Сортировать по:</span>
+                            <label v-for="option in sortingOptions" :key="option" class="checkbox-label">
+                                <input type="radio" name="sort_group" :value="option" v-model="sortBy">
+                                {{ option }}
+                            </label>
+                        </div>
+
+                        <button 
+                            v-if="selectedStatuses.length || sortBy !== 'Новейшие'" 
+                            @click="resetFilters" 
+                            class="btn-reset"
+                        >
+                            Сбросить все фильтры
+                        </button>
+                    </div>
+                    <div v-if="reviews" class="reviews-list">
+                        <div v-for="review in filteredReviews" :key="review.id" class="review-card">
+                            <span>{{ review.author_name }}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </Default>
 </template>
 
 <style scoped>
+.profile-main {
+    display: grid;
+    grid-template-columns: 1fr 3.8fr;
+}
 .active {
     color: black !important;
     font-weight: 500 !important;
